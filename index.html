@@ -1,0 +1,340 @@
+<!-- =====================
+     휴먼 인터페이터 개발회사 포털 – HTML/CSS/JS 버전
+     사용 기술: 순수 HTML5 + Flexbox CSS + ES6 Vanilla JS
+     ===================== -->
+
+<!-- ▣ index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>휴먼 인터페이터</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        * {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  background: #f5f7fa;
+  color: #333;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.tabs button {
+  padding: 10px 18px;
+  border: 1px solid #888;
+  background: #fff;
+  border-radius: 22px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.tabs button.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+.progress {
+  width: 100%;
+  max-width: 600px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.bar {
+  height: 100%;
+  width: 0%;
+  background: #2563eb;
+  transition: width 0.3s;
+}
+#progress-text {
+  max-width: 600px;
+  margin: 4px auto 20px;
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+}
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+form .field {
+  display: flex;
+  flex-direction: column;
+}
+form label {
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 14px;
+}
+input,
+textarea,
+select {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
+}
+textarea {
+  resize: vertical;
+}
+button.submit {
+  padding: 14px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button.submit:hover {
+  background: #1e4fd1;
+}
+.alert {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #16a34a;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  font-size: 14px;
+}
+.alert.show {
+  opacity: 1;
+}
+    </style>
+  </head>
+  <body>
+    <h1>휴먼 인터페이터 개발회사 포털</h1>
+
+    <!-- ▶ 역할 선택 탭 -->
+    <div id="role-tabs" class="tabs">
+      <button data-role="partner" class="active">파트너 의뢰인</button>
+      <button data-role="outsourcing">외주 의뢰인</button>
+      <button data-role="recruiter">구인 의뢰인</button>
+      <button data-role="jobseeker">구직 의뢰인</button>
+    </div>
+
+    <!-- ▶ 진행률 바 -->
+    <div class="progress">
+      <div class="bar" id="progress-bar"></div>
+    </div>
+    <div id="progress-text">0% 완료</div>
+
+    <!-- ▶ 동적 폼 영역 -->
+    <form id="dynamic-form"></form>
+
+    <!-- 제출 후 토스트 알림 -->
+    <div id="toast" class="alert">정보가 제출되었습니다! ✔️</div>
+
+    <script>
+        (() => {
+  // ─────────────────────────────────────────────
+  // 1) 역할별 필드 정의
+  // ─────────────────────────────────────────────
+  const ROLES = {
+    partner: {
+      label: "파트너 의뢰인",
+      fields: [
+        { name: "name", label: "성명", type: "text" },
+        { name: "phone", label: "연락처", type: "tel" },
+        { name: "birth", label: "생년월일", type: "date" },
+        { name: "education", label: "최종학력", type: "text" },
+        { name: "certificates", label: "보유 자격증", type: "text" },
+        { name: "projects", label: "참여 프로젝트", type: "text" },
+        { name: "expertise", label: "잘하는 분야", type: "text" },
+        { name: "resume", label: "이력서", type: "file" },
+        { name: "email", label: "E-mail", type: "email" }
+      ]
+    },
+    outsourcing: {
+      label: "외주 의뢰인",
+      fields: [
+        { name: "company", label: "회사명", type: "text" },
+        { name: "phone", label: "연락처", type: "tel" },
+        { name: "stack", label: "기술스택", type: "text" },
+        { name: "title", label: "프로젝트 명", type: "text" },
+        { name: "budget", label: "예상 금액", type: "number", step: "100000" },
+        { name: "email", label: "E-mail", type: "email" }
+      ]
+    },
+    recruiter: {
+      label: "구인 의뢰인",
+      fields: [
+        { name: "company", label: "회사명", type: "text" },
+        { name: "phone", label: "회사 연락처", type: "tel" },
+        { name: "manager", label: "담당자명", type: "text" },
+        { name: "managerPhone", label: "담당자 연락처", type: "tel" },
+        { name: "description", label: "상세 업무 내용", type: "textarea" },
+        { name: "stack", label: "필수 기술", type: "text" },
+        { name: "period", label: "모집 기간", type: "text" },
+        { name: "location", label: "근무 지역", type: "text" },
+        { name: "headcount", label: "모집 인원", type: "number" },
+        { name: "career", label: "모집 부문", type: "text" },
+        { name: "email", label: "E-mail", type: "email" }
+      ]
+    },
+    jobseeker: {
+      label: "구직 의뢰인",
+      fields: [
+        { name: "name", label: "성명", type: "text" },
+        { name: "phone", label: "연락처", type: "tel" },
+        { name: "birth", label: "생년월일", type: "date" },
+        { name: "education", label: "최종학력", type: "text" },
+        { name: "certificates", label: "보유 자격증", type: "text" },
+        { name: "projects", label: "참여 프로젝트", type: "text" },
+        { name: "type", label: "채용 유형", type: "select", options: ["정직원", "프리랜서"] },
+        { name: "skills", label: "보유 기술", type: "text" },
+        { name: "resume", label: "이력서", type: "file" },
+        { name: "email", label: "E-mail", type: "email" }
+      ]
+    }
+  };
+
+  // ─────────────────────────────────────────────
+  // 2) DOM 요소 캐싱
+  // ─────────────────────────────────────────────
+  const tabs = document.querySelectorAll("#role-tabs button");
+  const form = document.getElementById("dynamic-form");
+  const bar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  const toast = document.getElementById("toast");
+
+  let activeRole = "partner";
+  const formState = {};
+
+  // ─────────────────────────────────────────────
+  // 3) 렌더링 함수
+  // ─────────────────────────────────────────────
+  function renderForm() {
+    form.innerHTML = "";
+    const { fields } = ROLES[activeRole];
+
+    fields.forEach((field) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "field";
+
+      const label = document.createElement("label");
+      label.textContent = `${field.label} *`;
+      wrapper.appendChild(label);
+
+      let input;
+      if (field.type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = 4;
+      } else if (field.type === "select") {
+        input = document.createElement("select");
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "선택…";
+        input.appendChild(placeholder);
+        field.options.forEach((opt) => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          input.appendChild(option);
+        });
+      } else {
+        input = document.createElement("input");
+        input.type = field.type;
+        if (field.step) input.step = field.step;
+        if (field.type === "file")
+          input.accept = ".pdf,.doc,.docx";
+      }
+      input.name = field.name;
+      input.required = true;
+      input.addEventListener("input", updateProgress);
+      wrapper.appendChild(input);
+
+      form.appendChild(wrapper);
+    });
+
+    const submitBtn = document.createElement("button");
+    submitBtn.type = "submit";
+    submitBtn.className = "submit";
+    submitBtn.textContent = "제출하기";
+    form.appendChild(submitBtn);
+
+    updateProgress();
+  }
+
+  // ─────────────────────────────────────────────
+  // 4) 진행률 계산
+  // ─────────────────────────────────────────────
+  function updateProgress() {
+    const inputs = form.querySelectorAll("input, textarea, select");
+    const total = inputs.length - 1; // submit 제외
+    let filled = 0;
+    inputs.forEach((el) => {
+      if (el.type === "file") {
+        if (el.files && el.files.length) filled++;
+      } else if (el.value.trim()) {
+        filled++;
+      }
+    });
+    const percent = Math.round((filled / total) * 100) || 0;
+    bar.style.width = `${percent}%`;
+    progressText.textContent = `${percent}% 완료`;
+  }
+
+  // ─────────────────────────────────────────────
+  // 5) 이벤트 바인딩
+  // ─────────────────────────────────────────────
+  tabs.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabs.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeRole = btn.dataset.role;
+      renderForm();
+    });
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    console.log(`[SUBMIT] ${activeRole}`, Object.fromEntries(data.entries()));
+    // TODO: fetch('/api', {method:'POST', body:data})
+    showToast();
+    form.reset();
+    updateProgress();
+  });
+
+  function showToast() {
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+  }
+
+  // 초기 렌더
+  renderForm();
+})();
+    </script>
+  </body>
+
+</html>
+
+
