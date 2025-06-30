@@ -1,4 +1,4 @@
-<!-- =====================
+`<!-- =====================
      휴먼 인터페이터 개발회사 포털 – HTML/CSS/JS 버전
      사용 기술: 순수 HTML5 + Flexbox CSS + ES6 Vanilla JS
      ===================== -->
@@ -130,7 +130,7 @@ button.submit:hover {
     </style>
   </head>
   <body>
-    <h1>휴먼 인터페이터 개발회사 포털</h1>
+    <h1>휴먼 인터페이터</h1>
 
     <!-- ▶ 역할 선택 탭 -->
     <div id="role-tabs" class="tabs">
@@ -177,9 +177,9 @@ button.submit:hover {
       fields: [
         { name: "company", label: "회사명", type: "text" },
         { name: "phone", label: "연락처", type: "tel" },
-        { name: "stack", label: "기술스택", type: "text" },
-        { name: "title", label: "프로젝트 명", type: "text" },
-        { name: "budget", label: "예상 금액", type: "number", step: "100000" },
+        { name: "stack", label: "의뢰할 기술스택", type: "text" },
+        { name: "title", label: "의뢰할 프로젝트 명", type: "text" },
+        { name: "budget", label: "프로젝트 예상 금액", type: "number", step: "100000" },
         { name: "email", label: "E-mail", type: "email" }
       ]
     },
@@ -193,9 +193,9 @@ button.submit:hover {
         { name: "description", label: "상세 업무 내용", type: "textarea" },
         { name: "stack", label: "필수 기술", type: "text" },
         { name: "period", label: "모집 기간", type: "text" },
-        { name: "location", label: "근무 지역", type: "text" },
+        { name: "location", label: "근무 시작일", type: "date"},
         { name: "headcount", label: "모집 인원", type: "number" },
-        { name: "career", label: "모집 부문", type: "text" },
+        { name: "career", label: "모집 구분", type: "select", options: ["신입", "경력"] },
         { name: "email", label: "E-mail", type: "email" }
       ]
     },
